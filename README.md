@@ -1,7 +1,9 @@
-# 🌾 Annsetu — Live Mandi Price Application
+# 🌾 Annsetu — Live Mandi Price Mobile Application
 
 > **Annsetu** (अन्नसेतु) means "bridge of food/grain" in Sanskrit.  
 > This app bridges farmers and markets by surfacing real-time mandi commodity prices from the Government of India's Open Data Portal.
+
+> **Platform:** Android (APK) — built with React Native + Expo (SDK 54)
 
 ---
 
@@ -11,7 +13,9 @@
 
 - **Node.js** v18+ installed → [nodejs.org](https://nodejs.org)
 - **npm** (comes with Node.js)
-- An API key from [data.gov.in](https://data.gov.in)
+- **Expo Go** app on your Android phone (for testing) → [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
+
+> **Note:** No separate backend server is needed! The app calls the Government API (data.gov.in) directly.
 
 ---
 
@@ -25,68 +29,61 @@ cd annsetu
 
 ---
 
-### 2. Set Up the Backend
+### 2. Set Up the Mobile App
 
 ```bash
-cd backend
+cd mobile
 npm install
 ```
 
-Copy the environment file and add your API key:
+Start the Expo development server:
 
 ```bash
-cp .env.example .env
+npx expo start
 ```
 
-Open `.env` and set your key:
-
-```
-MANDI_API_KEY=your_api_key_here
-PORT=3001
-```
-
-> Your API key is already pre-filled in `.env` for convenience. You can update it anytime.
-
-Start the backend server:
-
-```bash
-npm start
-```
-
-You should see:
-
-```
-✅ Annsetu backend running on http://localhost:3001
-```
+You should see a QR code in the terminal.
 
 ---
 
-### 3. Open the Frontend
+### 3. Test on Your Phone
 
-The frontend is plain HTML/CSS/JS — no build step needed.
+1. Make sure your **phone and computer are on the same Wi-Fi network**
+2. Open the **Expo Go** app on your phone
+3. Scan the QR code from the terminal
+4. The Annsetu app will load on your phone!
 
-Open a **new terminal tab** and navigate to the frontend folder:
-
-```bash
-cd frontend
-```
-
-Simply open `index.html` in your browser:
-
-- **macOS:** `open index.html`
-- **Windows:** `start index.html`
-- **Linux:** `xdg-open index.html`
-
-Or drag and drop `index.html` into any browser window.
+> **Tip:** If the QR code doesn't work, press `w` in the terminal to open the web version in your laptop's browser.
 
 ---
 
 ### 4. Use the App
 
-1. Click **"Get Mandi Prices"**
-2. Watch the loading spinner while data is fetched
-3. See the **Minimum** and **Maximum** prices animate into view
-4. Scroll down for the full commodity breakdown table
+1. You'll see **"Annsetu"** in the top-left corner
+2. Tap **"Find Mandi Prices"**
+3. See the **Minimum** and **Maximum** prices for Potato in Uttar Pradesh displayed below the button
+4. Commodity (Potato) and State (Uttar Pradesh) are fixed
+
+---
+
+### 5. Build the APK (Optional)
+
+To create a standalone APK file:
+
+```bash
+cd mobile
+
+# Install EAS CLI globally
+npm install -g eas-cli
+
+# Log in to Expo account (create one at expo.dev if needed)
+eas login
+
+# Build APK for Android
+eas build -p android --profile preview
+```
+
+The `preview` profile creates an APK (vs AAB for Play Store). You'll get a download link once the build completes.
 
 ---
 
@@ -94,73 +91,59 @@ Or drag and drop `index.html` into any browser window.
 
 ```
 annsetu/
-├── backend/
-│   ├── server.js          ← Express API server
-│   ├── package.json       ← Node dependencies
-│   ├── .env               ← API key (DO NOT commit to Git)
-│   └── .env.example       ← Template for new developers
+├── mobile/
+│   ├── App.js             ← Entry point — loads HomeScreen
+│   ├── app.json           ← Expo configuration (app name, icon)
+│   ├── package.json       ← React Native dependencies (Expo SDK 54)
+│   └── src/
+│       ├── screens/
+│       │   └── HomeScreen.js  ← Main screen — button + price display
+│       ├── services/
+│       │   └── api.js         ← Calls data.gov.in API directly
+│       └── theme.js           ← Colors, spacing, shadows
 │
-├── frontend/
-│   ├── index.html         ← Single-page UI
-│   ├── style.css          ← All visual styling
-│   └── app.js             ← Fetch logic and DOM updates
+├── backend/               ← (Legacy — not needed anymore)
+│   └── server.js          ← Express server (kept for reference)
 │
 ├── README.md              ← This file
-└── STUDY_GUIDE.md         ← Full project walkthrough for beginners
+├── STUDY_GUIDE.md         ← Full project walkthrough for beginners
+└── .gitignore
 ```
 
 ---
 
-## Environment Variables
+## How It Works
 
-| Variable       | Description                              | Default |
-|----------------|------------------------------------------|---------|
-| `MANDI_API_KEY`| Your data.gov.in API key                 | —       |
-| `PORT`         | Port the backend server listens on       | `3001`  |
-
----
-
-## API Reference
-
-### `GET /api/mandi-prices`
-
-Fetches the latest mandi prices from data.gov.in.
-
-**Response (success):**
-```json
-{
-  "success": true,
-  "summary": {
-    "minPrice": 500,
-    "maxPrice": 4200,
-    "totalRecords": 10
-  },
-  "records": [
-    {
-      "commodity": "Wheat",
-      "market": "Azadpur",
-      "state": "Delhi",
-      "minPrice": 1800,
-      "maxPrice": 2200,
-      "modalPrice": 2000,
-      "variety": "Other",
-      "arrivalDate": "01/06/2025"
-    }
-  ]
-}
 ```
-
-**Response (error):**
-```json
-{
-  "success": false,
-  "error": "Description of the problem"
-}
+┌──────────────────────────────────────────────┐
+│              ANDROID DEVICE                    │
+│                                                │
+│   App.js ──renders──► HomeScreen.js            │
+│                          │                     │
+│                   User taps button             │
+│                          │                     │
+│                          ▼                     │
+│              api.js → fetch(data.gov.in)       │
+│                          │                     │
+└──────────────────────────┼─────────────────────┘
+                           │  HTTPS GET Request
+                           ▼
+┌──────────────────────────────────────────────┐
+│     GOVERNMENT API (api.data.gov.in)           │
+│                                                │
+│   Returns JSON with mandi price records        │
+│                                                │
+└──────────────────────────┬─────────────────────┘
+                           │  JSON Response
+                           ▼
+┌──────────────────────────────────────────────┐
+│              ANDROID DEVICE                    │
+│                                                │
+│   api.js parses min/max prices                 │
+│   HomeScreen shows the results                 │
+│                                                │
+└──────────────────────────────────────────────┘
 ```
-
-### `GET /health`
-
-Returns `{ "status": "ok" }` — used to verify the server is running.
 
 ---
 
@@ -168,26 +151,18 @@ Returns `{ "status": "ok" }` — used to verify the server is running.
 
 | Problem | Fix |
 |---|---|
-| "Cannot connect to backend" | Make sure `npm start` is running in the `backend/` folder |
-| "Invalid or expired API key" | Update `MANDI_API_KEY` in `backend/.env` |
-| "No data found" | The government API may be temporarily unavailable — try again |
-| CORS error in browser console | Ensure backend is on port 3001 (default) |
-
----
-
-## Development Mode (Auto-restart)
-
-```bash
-cd backend
-npm run dev   # uses nodemon — restarts on file save
-```
+| "Download latest Expo Go" error | Make sure you're using **Expo SDK 54** (check `package.json` has `"expo": "~54.0.0"`) |
+| "No mandi price data found" | The government API may be temporarily unavailable — try again |
+| Expo Go won't connect | Ensure phone and computer are on the same Wi-Fi network |
+| QR code not scanning | Press `w` in terminal to open web version, or type the URL manually in Expo Go |
+| "No internet connection" | Check your phone/computer has internet access |
 
 ---
 
 ## Deployment Notes
 
-- **Backend:** Can be deployed to [Render](https://render.com), [Railway](https://railway.app), or any Node.js host. Set `MANDI_API_KEY` as an environment variable on the platform.
-- **Frontend:** Can be served via [Netlify](https://netlify.com), [Vercel](https://vercel.com), or GitHub Pages. Update `BACKEND_URL` in `app.js` to point to your deployed backend URL.
+- **Mobile App:** Use `eas build` to create APKs or AABs for the Google Play Store.
+- **No backend needed** — the app talks to data.gov.in directly.
 
 ---
 
