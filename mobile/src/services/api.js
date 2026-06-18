@@ -8,12 +8,52 @@ const API_URL = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a4
 const API_KEY = '579b464db66ec23bdd0000011eca722018e9429560514de390d5bb1e';
 
 /**
- * Fetches potato mandi prices for Uttar Pradesh directly from data.gov.in
+ * Fetches the list of distinct states from the Mandi API.
+ * We fetch a large batch and extract unique state names.
+ * Returns an array of state name strings, sorted alphabetically.
+ */
+export async function fetchStates() {
+  try {
+    const url = `${API_URL}?api-key=${API_KEY}&format=json&limit=1000`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const records = data?.records;
+
+    if (!records || records.length === 0) {
+      throw new Error('No data found to extract states.');
+    }
+
+    // Extract unique state names
+    const stateSet = new Set();
+    for (const r of records) {
+      const state = r.state || r.State;
+      if (state && state.trim()) {
+        stateSet.add(state.trim());
+      }
+    }
+
+    if (stateSet.size === 0) {
+      throw new Error('Could not extract state names from data.');
+    }
+
+    return Array.from(stateSet).sort();
+  } catch (err) {
+    if (err.message.includes('Network request failed')) {
+      throw new Error('No internet connection. Please check your network.');
+    }
+    throw err;
+  }
+}
+
+/**
+ * Fetches potato mandi prices for the given state from data.gov.in
  * Returns { minPrice, maxPrice }
  */
-export async function fetchMandiPrices() {
+export async function fetchMandiPrices(state = 'Uttar Pradesh') {
   try {
-    const url = `${API_URL}?api-key=${API_KEY}&format=json&limit=10&filters[commodity]=Potato&filters[state]=Uttar Pradesh`;
+    const url = `${API_URL}?api-key=${API_KEY}&format=json&limit=10&filters[commodity]=Potato&filters[state]=${encodeURIComponent(state)}`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -50,4 +90,3 @@ export async function fetchMandiPrices() {
     throw err;
   }
 }
-
