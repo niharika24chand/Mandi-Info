@@ -1,109 +1,49 @@
-# 🌾 Annsetu
-### Connecting Farmers to Live Mandi Prices
+# Mandi-Info
 
-**Annsetu** is a mobile application designed to bridge the information gap for farmers by providing real-time commodity prices sourced directly from the Government of India's Open Data Portal.
+A simple app that fetches live mandi prices for **Potato in Uttar Pradesh** from the Government of India's open data portal (data.gov.in).
 
----
-
-## 🚀 Key Features
-* **Real-time Price Sync:** Fetches active commodity prices directly from the official Indian government dataset (`data.gov.in`).
-* **Clean UI/UX:** High-contrast, easy-to-read price cards optimized for outdoor environments.
-* **Offline-Resilient Error Handling:** Gracefully handles network timeouts, API rate limits, and offline scenarios.
+Built as a prototype to demonstrate how agricultural market data can be surfaced in a clean, accessible UI.
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## Tech Stack
 
-### **Mobile App (Frontend)**
-* **Framework:** React Native with Expo (SDK 54)
-* **Design System:** Custom HSL palette featuring accessible contrast ratios.
-* **API Client:** Native `fetch` API directly interacting with the government REST endpoints.
-
-### **Proxy Server (Backend)**
-* **Runtime:** Node.js (Express)
-* **Purpose:** Built as an optional proxy server to encapsulate API keys and perform price aggregations.
-* **Dependencies:** `axios`, `cors`, `dotenv`.
+- **Mobile:** React Native + Expo
+- **Backend:** Node.js + Express
 
 ---
 
-## 📁 Project Directory
+## Project Structure
+Mandi-Info/
 
-```text
-annsetu/
-├── mobile/                   # React Native (Expo) Client
-│   ├── App.js                # App entry point
-│   ├── app.json              # Expo configuration
-│   ├── package.json          # Dependency manifest
-│   └── src/
-│       ├── screens/
-│       │   └── HomeScreen.js # Main UI screen & interaction logic
-│       ├── services/
-│       │   └── api.js        # API service layer (data.gov.in)
-│       └── theme.js          # App style tokens & custom theme
+├── backend/
+
+│   ├── server.js        ← Express server, calls the govt API and returns clean JSON
+
+│   ├── package.json     ← Backend dependencies
+
+│   ├── .env.example     ← Template for environment variables
+
+│   └── .env             ← Your actual API key (never push this)
+
 │
-└── backend/                  # Node.js (Express) API Proxy
-    ├── server.js             # Server routing and aggregation logic
-    ├── package.json          # Dependency manifest
-    └── .env.example          # Environment variables template
-```
 
----
+├── mobile/
 
-## ⚙️ Getting Started
+│   ├── App.js           ← Entry point, loads the home screen
 
-### Prerequisites
-* **Node.js** (v18+)
-* **Expo Go** app installed on your Android/iOS device.
+│   ├── index.js         ← Registers the app with Expo
 
----
+│   ├── app.json         ← Expo app configuration (name, icon, splash)
 
-### Step 1: Running the Mobile App (Expo Go)
-The mobile app calls the government API directly and can run independently of the backend server.
+│   ├── eas.json         ← Build configuration for APK generation
 
-1. Navigate to the `mobile` directory:
-   ```bash
-   cd mobile
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Expo development server:
-   ```bash
-   npm run start
-   ```
-4. **Scan the QR Code** printed in your terminal using the **Expo Go** app (Android) or your **Camera app** (iOS).
+│   └── src/             ← Screens, API logic, and theme
 
----
+│
 
-### Step 2: Running the Proxy Server (Optional)
-If you want to run the Express backend proxy server:
+└── README.md
 
-1. Navigate to the `backend` directory:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Copy environment configuration:
-   ```bash
-   copy .env.example .env
-   ```
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
+## How it works
 
----
-
-## 📡 API Details
-* **Source:** Open Government Data (OGD) Platform India (`api.data.gov.in`)
-* **Resource:** Mandi Market Prices (Agriculture Marketing)
-* **Filters:** Currently configured to retrieve Potato prices in Uttar Pradesh.
-
----
-
-## ⚖️ License
-This project is licensed under the MIT License. Feel free to use, modify, and distribute.
+The mobile app calls the Express backend, which fetches data from data.gov.in using a server-side API key and returns the min and max prices to display.
